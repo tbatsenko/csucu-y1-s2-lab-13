@@ -5,8 +5,8 @@ from lliststack import Stack
 class Maze :
     # Define constants to represent contents of the maze cells.
     MAZE_WALL = " *"
-    PATH_TOKEN = "x"
-    TRIED_TOKEN = "o"
+    PATH_TOKEN = " x"
+    TRIED_TOKEN = " o"
 
     # Creates a maze object with all cells marked as open.
     def __init__( self, num_rows, num_cols ):
@@ -43,15 +43,62 @@ class Maze :
     # Attempts to solve the maze by finding a path from the starting cell
     # to the exit. Returns True if a path is found and False otherwise.
     def findPath( self ):
-        pass
+        """
+        This method finds a path in a Maze and Returns True
+        if there is no path it will return None
+        """
+        mazeStk = Stack()
+        mazeStk.push(self._startCell)
+        cur = self._startCell
+        self._markPath(self._startCell.row, self._startCell.col)
+        while not mazeStk.isEmpty():
+            possible_moves = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+
+            cur.row = mazeStk.peek().row
+            cur.col = mazeStk.peek().col
+
+            self._markPath(cur.row, cur.col)
+
+            moved = False
+            for i, j in possible_moves:
+                if self._validMove(cur.row + i, cur.col + j):
+                    cur.row = cur.row + i
+                    cur.col = cur.col + j
+                    mazeStk.push(_CellPosition(cur.row, cur.col))
+                    moved = True
+                    break
+            if moved:
+                # print("MOVED: ", cur.row, cur.col)
+                if self._exitFound(cur.row, cur.col):
+                    self._markPath(cur.row, cur.col)
+                    return True
+                continue
+            visited_cell = mazeStk.pop()
+            # print(visited_cell.row, visited_cell.col)
+            self._markTried(visited_cell.row, visited_cell.col)
+
+
+
+
+
 
     # Resets the maze by removing all "path" and "tried" tokens.
     def reset( self ):
-        pass
+        for row in self.num_rows():
+            for col in self.num_cols:
+                if self._mazeCells[row, col] == self.PATH_TOKEN \
+                or self._mazeCells[row, col] == self.TRIED_TOKEN:
+                    self._mazeCells[row, col] = None
+
 
     # Prints a text-based representation of the maze.
     def draw( self ):
-        pass
+        for row in range(self.num_rows()):
+            for col in range(self.num_cols()):
+                if self._mazeCells[row, col] == None:
+                    self._mazeCells[row, col] = "  "
+                print(self._mazeCells[row, col], end="")
+            print("\n")
 
     # Returns True if the given cell position is a valid move.
     def _validMove( self, row, col ):
