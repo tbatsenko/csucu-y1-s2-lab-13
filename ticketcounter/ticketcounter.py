@@ -4,7 +4,7 @@ from arrayqueue import ArrayQueue
 from people import TicketAgent, Passenger
 import random
 
-class TicketCounterSimulation :
+class TicketCounterSimulation(object):
     # Create a simulation object.
     def __init__( self, numAgents, numMinutes, betweenTime, serviceTime ):
         # Parameters supplied by the user.
@@ -25,9 +25,9 @@ class TicketCounterSimulation :
     # Run the simulation using the parameters supplied earlier.
     def run( self ):
         for curTime in range(self._numMinutes + 1) :
-            self._handleArrival( curTime )
-            self._handleBeginService( curTime )
-            self._handleEndService( curTime )
+            self._handleArrive(curTime)
+            self._handleBeginService(curTime)
+            self._handleEndService(curTime)
 
     # Print the simulation results.
     def printResults( self ):
@@ -39,19 +39,8 @@ class TicketCounterSimulation :
         len(self._passengerQ) )
         print( "The average wait time was %4.2f minutes." % avgWait )
 
-    """
-
-
-
-
-
-
-    When the simulation completes, the average waiting time can be computed by
-    dividing the total waiting time for all customers by the total number of customers.
-
-    """
     # Handles simulation rule #1.
-    def _handleArrive( curTime ):
+    def _handleArrive(self, curTime):
         """
         Rule 1: If a customer arrives, he is added to the queue.
         At most, one customer can arrive during each time step.
@@ -59,10 +48,10 @@ class TicketCounterSimulation :
         if random.random() <= self._arriveProb:
             self._numPassengers += 1
             thePassenger = Passenger(self._numPassengers, curTime)
+            print("Time {}: Passenger {} arrived.".format(curTime, self._numPassengers))
             self._passengerQ.add(thePassenger)
-
     # Handles simulation rule #2.
-    def _handleBeginService( curTime ):
+    def _handleBeginService(self, curTime):
         """
         Rule 2: If there are customers waiting, for each free server,
         the next customer in line begins her transaction.
@@ -73,11 +62,16 @@ class TicketCounterSimulation :
                     thePassenger = self._passengerQ.pop()
                     agent.startService(thePassenger,
                      curTime + self._serviceTime)
+                    print("Time {}: Agent {} started serving passenger {}.".format(curTime, agent._idNum, thePassenger._idNum))
 
     # Handles simulation rule #3.
-    def _handleEndService( curTime ):
+    def _handleEndService( self, curTime ):
         """
         Rule 3: For each server handling a transaction, if the transaction is complete, the
         customer departs and the server becomes free.
         """
-        pass
+        for agent in self._theAgents:
+            if agent.isFinished(curTime):
+                thePassenger = agent.stopService()
+                self._totalWaitTime += curTime - thePassenger._arrivalTime - self._serviceTime
+                print("Time {}: Agent {} stopped serving passenger {}.".format(curTime, agent._idNum, thePassenger._idNum))

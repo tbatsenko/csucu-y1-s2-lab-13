@@ -16,4 +16,4 @@ betweenTime = float(input("Average time between passenger arrival: "))
 simulation = TicketCounterSimulation(numAgents, numMinutes, betweenTime, serviceTime)
 
 simulation.run()
-print(simulation)
+simulation.printResults()
